@@ -1,0 +1,97 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>RoomRangeConfig</AssemblyName>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!--
+    ==========================================================================
+    Locating BepInEx / game DLLs
+
+    These references are Private=false, so none of this ends up in the built
+    DLL - it only matters for compiling on YOUR machine. Everyone who builds
+    this only needs to edit ModManagerProfile below (one line), because:
+
+      - $(APPDATA) already resolves to the right path per-user automatically
+        (Thunderstore Mod Manager stores profiles under
+        %APPDATA%\Thunderstore Mod Manager\DataFolder\REPO\profiles\<name>).
+        No need to hardcode a username anywhere.
+      - <ModManagerProfile> is the one thing that's actually different per
+        person: your profile's display name (shown in Thunderstore Mod
+        Manager's profile switcher, e.g. "Solo", "Default", "Modded").
+
+    If you're on r2modman instead, its profiles live at a different path:
+      %APPDATA%\r2modmanPlus-local\REPO\profiles\<name>
+    Swap the RepoBepInExDir line below to that if so. If you installed BepInEx
+    directly into the Steam folder instead of using a mod manager, set
+    UseSteamInstallInstead to true.
+    ==========================================================================
+  -->
+  <PropertyGroup>
+    <ModManagerProfile>Solo</ModManagerProfile>
+
+    <!-- Set to true if you installed BepInEx directly into the Steam game folder
+         instead of using a mod manager profile. -->
+    <UseSteamInstallInstead>false</UseSteamInstallInstead>
+    <SteamGameDir>C:\Program Files (x86)\Steam\steamapps\common\REPO</SteamGameDir>
+
+    <RepoBepInExDir Condition="'$(UseSteamInstallInstead)' == 'false'">$(APPDATA)\Thunderstore Mod Manager\DataFolder\REPO\profiles\$(ModManagerProfile)</RepoBepInExDir>
+    <RepoBepInExDir Condition="'$(UseSteamInstallInstead)' == 'true'">$(SteamGameDir)</RepoBepInExDir>
+
+    <!-- The game's own Managed DLLs (UnityEngine, Assembly-CSharp) are NOT copied into
+         mod manager profiles - those always come from the real Steam install, regardless
+         of which BepInEx you're using above. -->
+    <RepoManagedDir>$(SteamGameDir)\REPO_Data\Managed</RepoManagedDir>
+  </PropertyGroup>
+
+  <Target Name="PrintDetectedPaths" BeforeTargets="Build">
+    <Message Importance="high" Text="RoomRangeConfig: BepInEx from $(RepoBepInExDir)\BepInEx\core" />
+    <Message Importance="high" Text="RoomRangeConfig: Game DLLs from $(RepoManagedDir)" />
+    <Error Condition="!Exists('$(RepoBepInExDir)\BepInEx\core\BepInEx.dll')"
+           Text="BepInEx.dll not found at '$(RepoBepInExDir)\BepInEx\core\BepInEx.dll'. Check ModManagerProfile matches your actual profile name in Thunderstore Mod Manager, or set UseSteamInstallInstead if applicable." />
+    <Error Condition="!Exists('$(RepoManagedDir)\Assembly-CSharp.dll')"
+           Text="Assembly-CSharp.dll not found at '$(RepoManagedDir)'. Check SteamGameDir points to your actual R.E.P.O. install." />
+  </Target>
+
+  <ItemGroup>
+    <!-- Jsonmanager.cs (SpawnConfig module) uses Newtonsoft.Json.JsonConvert /
+         JsonTextWriter directly, but nothing else in the project referenced
+         Json.NET - pulling it from NuGet is the most portable fix since it
+         doesn't depend on guessing whether/where the game ships its own copy. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- BepInEx core + Harmony -->
+    <Reference Include="BepInEx">
+      <HintPath>$(RepoBepInExDir)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(RepoBepInExDir)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- Unity + game assemblies - always from the real Steam install -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(RepoManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RepoManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RepoManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PhotonUnityNetworking">
+      <HintPath>$(RepoManagedDir)\PhotonUnityNetworking.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

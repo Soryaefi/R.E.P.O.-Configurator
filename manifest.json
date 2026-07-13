@@ -1,0 +1,9 @@
+{
+  "name": "RoomRangeConfig",
+  "version_number": "1.6.1",
+  "website_url": "",
+  "description": "Configure rooms/extractions per level via milestones, plus per-map room caps, per-milestone valuables value/count overrides with real Minimum Amount/Minimum Total Value floors, forced enemy-respawn fallback on tiny maps, enemy relocation-on-despawn with a gated natural despawn cycle, and a custom lobby size (2-50 players).",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2304"
+  ]
+}

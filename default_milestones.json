@@ -1,0 +1,5 @@
+[
+  { "level": 1, "minRooms": 5, "maxRooms": 7, "extractions": 1 },
+  { "level": 4, "minRooms": 7, "maxRooms": 9, "extractions": 2 },
+  { "level": 8, "minRooms": 9, "maxRooms": 12, "extractions": 3 }
+]
